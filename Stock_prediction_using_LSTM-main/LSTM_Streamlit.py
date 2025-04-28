@@ -71,36 +71,6 @@ def prepare_data(data, lookback=14):
     return X_train, X_test, y_train, y_test, scaler, available_features
 
 
-# Step 3: Model Loading and Prediction
-def load_and_predict(model_file, X_test, scaler, features):
-    # Save the uploaded model file to a temporary location
-    model_path = "/tmp/lstm_model.h5"
-    with open(model_path, 'wb') as f:
-        f.write(model_file.read())
-    
-    # Load the model from the temporary file
-    model = load_model(model_path, custom_objects={'mse': MeanSquaredError()})
-    
-    # Print model summary to understand input shape
-    model.summary()
-    
-    # Adjust the shape of X_test based on the number of features the model expects
-    num_features = len(features)
-    X_test_reshaped = X_test.reshape((X_test.shape[0], X_test.shape[1], num_features))
-    
-    # Make predictions
-    y_pred = model.predict(X_test_reshaped)
-    
-    # Rescale predictions
-    def rescale(data, predictions):
-        dummy_features = np.zeros((len(predictions), len(features) - 1))  # Dummy features for the extra columns
-        rescaled = scaler.inverse_transform(np.concatenate([predictions, dummy_features], axis=1))
-        return rescaled[:, 0]  # Only return the predicted price
-    
-    y_pred_rescaled = rescale(data[features], y_pred)
-    
-    return y_pred_rescaled
-
 
 
 # Step 4: Streamlit Web App
