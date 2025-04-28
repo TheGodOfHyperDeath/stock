@@ -13,10 +13,13 @@ import matplotlib.pyplot as plt
 def load_stock_data(ticker, start_date, end_date):
     data = yf.download(ticker, start=start_date, end=end_date)
     
-    # Check if 'Adj Close' exists or print the columns to investigate
+    # Print the columns to see the structure of the data
+    st.write("Columns in the data:", data.columns)
+    st.write("First few rows of the data:", data.head())
+    
+    # Check if 'Adj Close' exists
     if 'Adj Close' not in data.columns:
         st.error(f"'Adj Close' column not found in the data for {ticker}. Please check the data structure.")
-        st.write(data.columns)  # Display available columns for debugging
         return pd.DataFrame()  # Return empty dataframe if 'Adj Close' is missing
     
     # Calculate returns and other indicators
