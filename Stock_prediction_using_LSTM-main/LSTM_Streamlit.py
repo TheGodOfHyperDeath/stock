@@ -12,10 +12,19 @@ import matplotlib.pyplot as plt
 # Step 1: Load the Stock Data
 def load_stock_data(ticker, start_date, end_date):
     data = yf.download(ticker, start=start_date, end=end_date)
+    
+    # Check if 'Adj Close' exists or print the columns to investigate
+    if 'Adj Close' not in data.columns:
+        st.error(f"'Adj Close' column not found in the data for {ticker}. Please check the data structure.")
+        st.write(data.columns)  # Display available columns for debugging
+        return pd.DataFrame()  # Return empty dataframe if 'Adj Close' is missing
+    
+    # Calculate returns and other indicators
     data['Return'] = data['Adj Close'].pct_change()
     data['RSI'] = ta.momentum.RSIIndicator(data['Adj Close'].squeeze()).rsi()
     data['EMA'] = ta.trend.EMAIndicator(data['Adj Close'].squeeze()).ema_indicator()
     data.dropna(inplace=True)
+    
     return data
 
 # Step 2: Prepare the Dataset
