@@ -13,22 +13,29 @@ import matplotlib.pyplot as plt
 def load_stock_data(ticker, start_date, end_date):
     data = yf.download(ticker, start=start_date, end=end_date)
     
-    # Print the columns to see the structure of the data
+    # Inspect and display the column names and a preview of the data for debugging
     st.write("Columns in the data:", data.columns)
     st.write("First few rows of the data:", data.head())
-    
-    # Check if 'Adj Close' exists
-    if 'Adj Close' not in data.columns:
-        st.error(f"'Adj Close' column not found in the data for {ticker}. Please check the data structure.")
-        return pd.DataFrame()  # Return empty dataframe if 'Adj Close' is missing
+
+    # Check for the adjusted close column, or fall back to 'Close' if it's missing
+    if 'Adj Close' in data.columns:
+        st.write("Using 'Adj Close' for calculations.")
+        close_column = 'Adj Close'
+    elif 'Close' in data.columns:
+        st.write("Using 'Close' for calculations.")
+        close_column = 'Close'
+    else:
+        st.error(f"Neither 'Adj Close' nor 'Close' found in the data for {ticker}.")
+        return pd.DataFrame()  # Return empty dataframe if neither column is found
     
     # Calculate returns and other indicators
-    data['Return'] = data['Adj Close'].pct_change()
-    data['RSI'] = ta.momentum.RSIIndicator(data['Adj Close'].squeeze()).rsi()
-    data['EMA'] = ta.trend.EMAIndicator(data['Adj Close'].squeeze()).ema_indicator()
+    data['Return'] = data[close_column].pct_change()
+    data['RSI'] = ta.momentum.RSIIndicator(data[close_column].squeeze()).rsi()
+    data['EMA'] = ta.trend.EMAIndicator(data[close_column].squeeze()).ema_indicator()
     data.dropna(inplace=True)
     
     return data
+
 
 # Step 2: Prepare the Dataset
 def prepare_data(data, lookback=14):
