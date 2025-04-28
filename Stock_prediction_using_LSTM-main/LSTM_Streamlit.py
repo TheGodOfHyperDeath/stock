@@ -39,10 +39,9 @@ def load_stock_data(ticker, start_date, end_date):
     return data
 
 # Step 2: Prepare the Dataset
-# Update features to include 'Adj Close'
 def prepare_data(data, lookback=14):
     # Ensure 'Adj Close' is included as a feature
-    features = ['Adj Close', 'Volume', 'RSI', 'EMA']
+    features = ['Adj Close', 'Volume', 'RSI', 'EMA']  # Add 'Adj Close' to the list of features
     
     available_features = [col for col in features if col in data.columns]
     if len(available_features) == 0:
@@ -58,8 +57,8 @@ def prepare_data(data, lookback=14):
     def create_sequences(data, lookback):
         X, y = [], []
         for i in range(lookback, len(data)):
-            X.append(data[i-lookback:i])
-            y.append(data[i, 0])  # Target is the first column: 'Adj Close' or equivalent
+            X.append(data[i-lookback:i])  # Lookback period for time-series
+            y.append(data[i, 0])  # Target is the first column: 'Adj Close'
         return np.array(X), np.array(y)
 
     X, y = create_sequences(scaled_data, lookback)
