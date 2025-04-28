@@ -75,7 +75,6 @@ def prepare_data(data, lookback=14):
     return X_train, X_test, y_train, y_test, scaler, available_features
 
 # Step 3: Model Loading and Prediction
-# Step 3: Model Loading and Prediction
 def load_and_predict(model_file, X_test, scaler, features):
     # Save the uploaded model file to a temporary location
     model_path = "/tmp/lstm_model.h5"
@@ -85,7 +84,10 @@ def load_and_predict(model_file, X_test, scaler, features):
     # Load the model from the temporary file
     model = load_model(model_path, custom_objects={'mse': MeanSquaredError()})
     
-    # Check the shape of X_test
+    # Print the model summary to understand its input shape
+    model.summary()
+    
+    # Check the shape of X_test before prediction
     st.write("Shape of X_test before prediction:", X_test.shape)
     
     # Reshape X_test if needed: (samples, timesteps, features)
@@ -95,7 +97,11 @@ def load_and_predict(model_file, X_test, scaler, features):
     st.write("Shape of X_test after reshaping:", X_test.shape)
     
     # Make predictions
-    y_pred = model.predict(X_test)
+    try:
+        y_pred = model.predict(X_test)
+    except Exception as e:
+        st.write(f"Error during prediction: {e}")
+        return None
 
     # Rescale predictions
     def rescale(data, predictions):
@@ -106,6 +112,7 @@ def load_and_predict(model_file, X_test, scaler, features):
     y_pred_rescaled = rescale(data[features], y_pred)
     
     return y_pred_rescaled
+
 
 
 # Step 4: Streamlit Web App
