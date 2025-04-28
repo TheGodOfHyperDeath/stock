@@ -9,6 +9,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.losses import MeanSquaredError
 import matplotlib.pyplot as plt
 import io
+import os
 
 # Step 1: Load the Stock Data
 def load_stock_data(ticker, start_date, end_date):
@@ -74,7 +75,15 @@ def prepare_data(data, lookback=14):
     return X_train, X_test, y_train, y_test, scaler, available_features
 
 # Step 3: Model Loading and Prediction
-def load_and_predict(model, X_test, scaler, features):
+def load_and_predict(model_file, X_test, scaler, features):
+    # Save the uploaded model file to a temporary location
+    model_path = "/tmp/lstm_model.h5"
+    with open(model_path, 'wb') as f:
+        f.write(model_file.read())
+    
+    # Load the model from the temporary file
+    model = load_model(model_path, custom_objects={'mse': MeanSquaredError()})
+    
     # Make predictions
     y_pred = model.predict(X_test)
 
@@ -110,12 +119,8 @@ X_train, X_test, y_train, y_test, scaler, features = prepare_data(data)
 model_file = st.file_uploader("Upload your LSTM model", type=["h5"])
 
 if model_file is not None:
-    # Load the uploaded model from the file-like object
-    model = load_model(io.BytesIO(model_file.read()), custom_objects={'mse': MeanSquaredError()})
-    st.write("Model loaded successfully.")
-    
-    # Make predictions with the model
-    y_pred_rescaled = load_and_predict(model, X_test, scaler, features)
+    # Load and make predictions with the model
+    y_pred_rescaled = load_and_predict(model_file, X_test, scaler, features)
     
     # Plot True vs Predicted Prices
     plt.figure(figsize=(12, 6))
