@@ -75,6 +75,7 @@ def prepare_data(data, lookback=14):
     return X_train, X_test, y_train, y_test, scaler, available_features
 
 # Step 3: Model Loading and Prediction
+# Step 3: Model Loading and Prediction
 def load_and_predict(model_file, X_test, scaler, features):
     # Save the uploaded model file to a temporary location
     model_path = "/tmp/lstm_model.h5"
@@ -83,6 +84,15 @@ def load_and_predict(model_file, X_test, scaler, features):
     
     # Load the model from the temporary file
     model = load_model(model_path, custom_objects={'mse': MeanSquaredError()})
+    
+    # Check the shape of X_test
+    st.write("Shape of X_test before prediction:", X_test.shape)
+    
+    # Reshape X_test if needed: (samples, timesteps, features)
+    if len(X_test.shape) == 2:  # If it is 2D, reshape to 3D
+        X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))  # Add a dimension for timesteps (1 in this case)
+    
+    st.write("Shape of X_test after reshaping:", X_test.shape)
     
     # Make predictions
     y_pred = model.predict(X_test)
@@ -96,6 +106,7 @@ def load_and_predict(model_file, X_test, scaler, features):
     y_pred_rescaled = rescale(data[features], y_pred)
     
     return y_pred_rescaled
+
 
 # Step 4: Streamlit Web App
 st.title("Stock Price Prediction with LSTM")
