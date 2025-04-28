@@ -41,11 +41,9 @@ def load_stock_data(ticker, start_date, end_date):
 # Step 2: Prepare the Dataset
 def prepare_data(data, lookback=14):
     # Ensure 'Adj Close' is included as a feature
-    features = ['Adj Close', 'Volume', 'RSI', 'EMA']  # Add 'Adj Close' to the list of features
+    features = ['Adj Close', 'Volume', 'RSI', 'EMA']  # Make sure 'Adj Close' is included as the first feature
     
-    # Check which features are available in the data
     available_features = [col for col in features if col in data.columns]
-    
     if len(available_features) == 0:
         st.error("None of the required columns are available in the data.")
         return None, None, None, None, None, None
