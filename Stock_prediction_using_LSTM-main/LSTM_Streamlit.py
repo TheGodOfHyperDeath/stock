@@ -43,7 +43,9 @@ def prepare_data(data, lookback=14):
     # Ensure 'Adj Close' is included as a feature
     features = ['Adj Close', 'Volume', 'RSI', 'EMA']  # Add 'Adj Close' to the list of features
     
+    # Check which features are available in the data
     available_features = [col for col in features if col in data.columns]
+    
     if len(available_features) == 0:
         st.error("None of the required columns are available in the data.")
         return None, None, None, None, None, None
@@ -54,16 +56,17 @@ def prepare_data(data, lookback=14):
     scaler = MinMaxScaler()
     scaled_data = scaler.fit_transform(data[available_features])
 
+    # Function to create sequences for LSTM
     def create_sequences(data, lookback):
         X, y = [], []
         for i in range(lookback, len(data)):
-            X.append(data[i-lookback:i])  # Lookback period for time-series
-            y.append(data[i, 0])  # Target is the first column: 'Adj Close'
+            X.append(data[i-lookback:i])  # Select time_steps (lookback period)
+            y.append(data[i, 0])  # Target is the first column: 'Adj Close' (price)
         return np.array(X), np.array(y)
 
     X, y = create_sequences(scaled_data, lookback)
     
-    # Split data into training and testing
+    # Split data into training and testing sets
     train_size = int(0.8 * len(X))
     X_train, X_test = X[:train_size], X[train_size:]
     y_train, y_test = y[:train_size], y[train_size:]
