@@ -84,11 +84,15 @@ def load_and_predict(model_file, X_test, scaler, features):
     # Load the model from the temporary file
     model = load_model(model_path, custom_objects={'mse': MeanSquaredError()})
     
-    # Check the input shape
-    st.write(f"X_test shape before prediction: {X_test.shape}")
+    # Print model summary to understand input shape
+    model.summary()
+    
+    # Adjust the shape of X_test based on the number of features the model expects
+    num_features = len(features)
+    X_test_reshaped = X_test.reshape((X_test.shape[0], X_test.shape[1], num_features))
     
     # Make predictions
-    y_pred = model.predict(X_test)
+    y_pred = model.predict(X_test_reshaped)
     
     # Rescale predictions
     def rescale(data, predictions):
@@ -99,6 +103,7 @@ def load_and_predict(model_file, X_test, scaler, features):
     y_pred_rescaled = rescale(data[features], y_pred)
     
     return y_pred_rescaled
+
 
 
 # Step 4: Streamlit Web App
