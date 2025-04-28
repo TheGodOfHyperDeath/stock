@@ -36,7 +36,6 @@ def load_stock_data(ticker, start_date, end_date):
     
     return data
 
-
 # Step 2: Prepare the Dataset
 def prepare_data(data, lookback=14):
     # Inspect the available columns in the data
@@ -73,12 +72,8 @@ def prepare_data(data, lookback=14):
     
     return X_train, X_test, y_train, y_test, scaler, available_features
 
-
 # Step 3: Model Loading and Prediction
-def load_and_predict(model_file, X_test, scaler, features):
-    # Load the saved model, passing the custom loss function explicitly
-    model = load_model(model_file, custom_objects={'mse': MeanSquaredError()})
-    
+def load_and_predict(model, X_test, scaler, features):
     # Make predictions
     y_pred = model.predict(X_test)
 
@@ -103,21 +98,36 @@ end_date = st.date_input("End Date", pd.to_datetime("2023-12-31"))
 
 # Load data and prepare for prediction
 data = load_stock_data(stock_symbol, start_date, end_date)
+
+# If no data is found, stop further execution
+if data.empty:
+    st.stop()
+
 X_train, X_test, y_train, y_test, scaler, features = prepare_data(data)
 
-# Load the model and make predictions
-y_pred_rescaled = load_and_predict('/Users/manojkumarbollineni/Desktop/LSTM/lstm_stock_model.h5', X_test, scaler, features)
+# File uploader for LSTM model
+model_file = st.file_uploader("Upload your LSTM model", type=["h5"])
 
-# Plot True vs Predicted Prices
-plt.figure(figsize=(12, 6))
-plt.plot(y_test, label="True Prices", alpha=0.7)
-plt.plot(y_pred_rescaled, label="Predicted Prices", alpha=0.7)
-plt.title(f"True vs Predicted Prices for {stock_symbol}")
-plt.xlabel("Time Steps")
-plt.ylabel("Price")
-plt.legend()
-st.pyplot(plt)
+if model_file is not None:
+    # Load the uploaded model
+    model = load_model(model_file, custom_objects={'mse': MeanSquaredError()})
+    st.write("Model loaded successfully.")
+    
+    # Make predictions with the model
+    y_pred_rescaled = load_and_predict(model, X_test, scaler, features)
+    
+    # Plot True vs Predicted Prices
+    plt.figure(figsize=(12, 6))
+    plt.plot(y_test, label="True Prices", alpha=0.7)
+    plt.plot(y_pred_rescaled, label="Predicted Prices", alpha=0.7)
+    plt.title(f"True vs Predicted Prices for {stock_symbol}")
+    plt.xlabel("Time Steps")
+    plt.ylabel("Price")
+    plt.legend()
+    st.pyplot(plt)
 
-# Show Prediction Results
-st.write(f"Predicted Prices for {stock_symbol} (Last 5 predictions):")
-st.write(y_pred_rescaled[:5])
+    # Show Prediction Results
+    st.write(f"Predicted Prices for {stock_symbol} (Last 5 predictions):")
+    st.write(y_pred_rescaled[:5])
+else:
+    st.write("Please upload a model file to proceed.")
