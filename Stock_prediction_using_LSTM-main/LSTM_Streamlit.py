@@ -11,16 +11,27 @@ import yfinance as yf
 # Load stock data
 def load_stock_data(stock_symbol, start_date, end_date):
     data = yf.download(stock_symbol, start=start_date, end=end_date)
-
+    
+    # Print the columns to inspect the structure
+    print("Columns in the data:", data.columns)
+    
     # Check for multi-level columns and flatten them if needed
     if isinstance(data.columns, pd.MultiIndex):
         data.columns = data.columns.get_level_values(1)  # Flatten the multi-level column index
-
+    
+    # Print again to check if the columns are now accessible
+    print("Flattened Columns:", data.columns)
+    
     # Now access 'Adj Close' column correctly
-    data['Return'] = data['Adj Close'].pct_change()
+    if 'Adj Close' in data.columns:
+        data['Return'] = data['Adj Close'].pct_change()
+    else:
+        print("Error: 'Adj Close' column not found!")
+    
     data['RSI'] = compute_rsi(data['Adj Close'])
     data['EMA'] = data['Adj Close'].ewm(span=14, adjust=False).mean()
     return data
+
 
 
 # Calculate RSI (Relative Strength Index)
