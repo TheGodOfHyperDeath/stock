@@ -39,15 +39,29 @@ def load_stock_data(ticker, start_date, end_date):
 
 # Step 2: Prepare the Dataset
 def prepare_data(data, lookback=14):
+    # Inspect the available columns in the data
+    st.write("Available columns in the data:", data.columns)
+    
+    # Define the features we want to use, but check if they exist in the dataset
     features = ['Adj Close', 'Volume', 'RSI', 'EMA']
+    
+    # Ensure that only the columns that exist in the data are selected
+    available_features = [col for col in features if col in data.columns]
+    if len(available_features) == 0:
+        st.error("None of the required columns are available in the data.")
+        return None, None, None, None, None, None
+
+    st.write("Using the following features for training:", available_features)
+    
+    # Ensure the data contains the necessary columns
     scaler = MinMaxScaler()
-    scaled_data = scaler.fit_transform(data[features])
+    scaled_data = scaler.fit_transform(data[available_features])
 
     def create_sequences(data, lookback):
         X, y = [], []
         for i in range(lookback, len(data)):
             X.append(data[i-lookback:i])
-            y.append(data[i, 0])  # Target is the first column: 'Adj Close'
+            y.append(data[i, 0])  # Target is the first column: 'Adj Close' or equivalent
         return np.array(X), np.array(y)
 
     X, y = create_sequences(scaled_data, lookback)
@@ -57,7 +71,8 @@ def prepare_data(data, lookback=14):
     X_train, X_test = X[:train_size], X[train_size:]
     y_train, y_test = y[:train_size], y[train_size:]
     
-    return X_train, X_test, y_train, y_test, scaler, features
+    return X_train, X_test, y_train, y_test, scaler, available_features
+
 
 # Step 3: Model Loading and Prediction
 def load_and_predict(model_file, X_test, scaler, features):
