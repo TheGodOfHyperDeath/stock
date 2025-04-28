@@ -1,15 +1,15 @@
- import streamlit as st
- import numpy as np
- import pandas as pd
- import yfinance as yf
- import ta
- from sklearn.preprocessing import MinMaxScaler
- import tensorflow as tf
- from tensorflow.keras.models import load_model
- from tensorflow.keras.losses import MeanSquaredError
- import matplotlib.pyplot as plt
- import io
- import os
+import streamlit as st
+import numpy as np
+import pandas as pd
+import yfinance as yf
+import ta
+from sklearn.preprocessing import MinMaxScaler
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+from tensorflow.keras.losses import MeanSquaredError
+import matplotlib.pyplot as plt
+import io
+import os
  
  # Step 1: Load the Stock Data
  def load_stock_data(ticker, start_date, end_date):
