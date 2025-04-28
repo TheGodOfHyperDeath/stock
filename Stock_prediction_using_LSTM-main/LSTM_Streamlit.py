@@ -11,21 +11,11 @@ import matplotlib.pyplot as plt
 
 # Step 1: Load the Stock Data
 def load_stock_data(ticker, start_date, end_date):
-    # Fetch stock data using yfinance
     data = yf.download(ticker, start=start_date, end=end_date)
-    
-    # Check if 'Adj Close' is in columns
-    if 'Adj Close' not in data.columns:
-        st.error(f"Error: 'Adj Close' column is missing. Available columns are: {', '.join(data.columns)}")
-        st.write(data)  # Display the full data for debugging purposes
-        st.stop()  # Stop execution if 'Adj Close' is missing
-
-    # Calculate returns, RSI, and EMA
     data['Return'] = data['Adj Close'].pct_change()
     data['RSI'] = ta.momentum.RSIIndicator(data['Adj Close'].squeeze()).rsi()
     data['EMA'] = ta.trend.EMAIndicator(data['Adj Close'].squeeze()).ema_indicator()
     data.dropna(inplace=True)
-    
     return data
 
 # Step 2: Prepare the Dataset
@@ -52,13 +42,9 @@ def prepare_data(data, lookback=14):
 
 # Step 3: Model Loading and Prediction
 def load_and_predict(model_file, X_test, scaler, features):
-    # Ensure model file exists
-    try:
-        model = load_model(model_file, custom_objects={'mse': MeanSquaredError()})
-    except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
-        st.stop()  # Stop execution if model fails to load
-
+    # Load the saved model, passing the custom loss function explicitly
+    model = load_model(model_file, custom_objects={'mse': MeanSquaredError()})
+    
     # Make predictions
     y_pred = model.predict(X_test)
 
@@ -86,8 +72,7 @@ data = load_stock_data(stock_symbol, start_date, end_date)
 X_train, X_test, y_train, y_test, scaler, features = prepare_data(data)
 
 # Load the model and make predictions
-model_file = '/path/to/your/model/lstm_stock_model.h5'  # Make sure the path is correct
-y_pred_rescaled = load_and_predict(model_file, X_test, scaler, features)
+y_pred_rescaled = load_and_predict('/Users/manojkumarbollineni/Desktop/LSTM/lstm_stock_model.h5', X_test, scaler, features)
 
 # Plot True vs Predicted Prices
 plt.figure(figsize=(12, 6))
