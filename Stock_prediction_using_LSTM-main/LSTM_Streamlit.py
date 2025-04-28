@@ -16,7 +16,8 @@ def load_stock_data(ticker, start_date, end_date):
     
     # Check if 'Adj Close' is in columns
     if 'Adj Close' not in data.columns:
-        st.error("Error: 'Adj Close' column is missing. Available columns are: " + ", ".join(data.columns))
+        st.error(f"Error: 'Adj Close' column is missing. Available columns are: {', '.join(data.columns)}")
+        st.write(data)  # Display the full data for debugging purposes
         st.stop()  # Stop execution if 'Adj Close' is missing
 
     # Calculate returns, RSI, and EMA
