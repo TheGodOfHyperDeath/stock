@@ -84,18 +84,22 @@ def load_and_predict(model_file, X_test, scaler, features):
     # Load the model from the temporary file
     model = load_model(model_path, custom_objects={'mse': MeanSquaredError()})
     
+    # Check the input shape
+    st.write(f"X_test shape before prediction: {X_test.shape}")
+    
     # Make predictions
     y_pred = model.predict(X_test)
-
+    
     # Rescale predictions
     def rescale(data, predictions):
-        dummy_features = np.zeros((len(predictions), len(features) - 1))
+        dummy_features = np.zeros((len(predictions), len(features) - 1))  # Dummy features for the extra columns
         rescaled = scaler.inverse_transform(np.concatenate([predictions, dummy_features], axis=1))
-        return rescaled[:, 0]
+        return rescaled[:, 0]  # Only return the predicted price
     
     y_pred_rescaled = rescale(data[features], y_pred)
     
     return y_pred_rescaled
+
 
 # Step 4: Streamlit Web App
 st.title("Stock Price Prediction with LSTM")
