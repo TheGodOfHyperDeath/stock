@@ -40,29 +40,15 @@ def load_stock_data(ticker, start_date, end_date):
 
 # Step 2: Prepare the Dataset
 def prepare_data(data, lookback=14):
-    # Inspect the available columns in the data
-    st.write("Available columns in the data:", data.columns)
-    
-    # Define the features we want to use, but check if they exist in the dataset
-    features = ['Adj Close', 'Volume', 'RSI', 'EMA']
-    
-    # Ensure that only the columns that exist in the data are selected
-    available_features = [col for col in features if col in data.columns]
-    if len(available_features) == 0:
-        st.error("None of the required columns are available in the data.")
-        return None, None, None, None, None, None
-
-    st.write("Using the following features for training:", available_features)
-    
-    # Ensure the data contains the necessary columns
+    features = ['Adj Close', 'Volume', 'RSI', 'EMA']  # Ensure this matches the features used during training
     scaler = MinMaxScaler()
-    scaled_data = scaler.fit_transform(data[available_features])
+    scaled_data = scaler.fit_transform(data[features])
 
     def create_sequences(data, lookback):
         X, y = [], []
         for i in range(lookback, len(data)):
             X.append(data[i-lookback:i])
-            y.append(data[i, 0])  # Target is the first column: 'Adj Close' or equivalent
+            y.append(data[i, 0])  # Target is the first column: 'Adj Close'
         return np.array(X), np.array(y)
 
     X, y = create_sequences(scaled_data, lookback)
@@ -72,9 +58,8 @@ def prepare_data(data, lookback=14):
     X_train, X_test = X[:train_size], X[train_size:]
     y_train, y_test = y[:train_size], y[train_size:]
     
-    return X_train, X_test, y_train, y_test, scaler, available_features
+    return X_train, X_test, y_train, y_test, scaler, features
 
-# Step 3: Model Loading and Prediction
 def load_and_predict(model_file, X_test, scaler, features):
     # Save the uploaded model file to a temporary location
     model_path = "/tmp/lstm_model.h5"
@@ -86,7 +71,7 @@ def load_and_predict(model_file, X_test, scaler, features):
     
     # Print the model summary to understand its input shape
     model.summary()
-    
+
     # Check the shape of X_test before prediction
     st.write("Shape of X_test before prediction:", X_test.shape)
     
@@ -95,7 +80,7 @@ def load_and_predict(model_file, X_test, scaler, features):
         X_test = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))  # Add a dimension for timesteps (1 in this case)
     
     st.write("Shape of X_test after reshaping:", X_test.shape)
-    
+
     # Make predictions
     try:
         y_pred = model.predict(X_test)
@@ -112,6 +97,7 @@ def load_and_predict(model_file, X_test, scaler, features):
     y_pred_rescaled = rescale(data[features], y_pred)
     
     return y_pred_rescaled
+
 
 
 
